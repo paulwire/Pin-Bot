@@ -28,14 +28,12 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
         val botId = manager.getApplicationDataSuspending().appClientId
         if (message.mentions.isNotEmpty() &&
             message.mentions[0].userId.toString().take(7) == botId.take(7)) {
-
             // Remove the mention from the text
             val mentionLength = message.mentions[0].length
             val textWithoutMention = message.text.drop(mentionLength + 1).trim()
 
             // Store pinned message for this conversation
             pinnedMessagesByConversation[conversationId.id] = textWithoutMention
-
             val confirmationMessage = WireMessage.Text.createReply(
                 conversationId = conversationId,
                 text = "I pinned this message: $textWithoutMention",
