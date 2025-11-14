@@ -16,21 +16,30 @@ fun main() {
     wireAppSdk.startListening()
 }
 class SampleEventsHandler : WireEventsHandlerSuspending() {
-    private var pinnedMessage: String = ""
+    private val pinnedMessagesByConversation = mutableMapOf<UUID, String>()
     override suspend fun onMessage(wireMessage: WireMessage.Text) {
+        val conversationId = wireMessage.conversationId
         val message = WireMessage.Text.createReply(
-            conversationId = wireMessage.conversationId,
+            conversationId = conversationId,
             text = wireMessage.text,
             originalMessage = wireMessage,
             mentions = wireMessage.mentions
         )
 
         val botId = manager.getApplicationDataSuspending().appClientId
-        if(message.mentions [0].userId.toString().take(7) == botId.take(7)){
-            pinnedMessage = message.text.substring(message.mentions [0].length+1)
+        if (message.mentions.isNotEmpty() &&
+            message.mentions[0].userId.toString().take(7) == botId.take(7)) {
+
+            // Remove the mention from the text
+            val mentionLength = message.mentions[0].length
+            val textWithoutMention = message.text.drop(mentionLength + 1).trim()
+
+            // Store pinned message for this conversation
+            pinnedMessagesByConversation[conversationId.id] = textWithoutMention
+
             val confirmationMessage = WireMessage.Text.createReply(
-                conversationId = wireMessage.conversationId,
-                text = "I pinned this message: $pinnedMessage",
+                conversationId = conversationId,
+                text = "I pinned this message: $textWithoutMention",
                 originalMessage = wireMessage,
                 mentions = wireMessage.mentions
             )
@@ -38,15 +47,19 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
         }
     }
 
+
     override suspend fun onMemberJoin(conversationId: QualifiedId, members: List<ConversationMember>) {
         super.onMemberJoin(conversationId, members)
-        if (pinnedMessage.isNotEmpty()){
+
+        val pinned = pinnedMessagesByConversation[conversationId.id]  // null if nothing pinned
+        if (!pinned.isNullOrEmpty()) {
             val message = WireMessage.Text.create(
                 conversationId = conversationId,
-                text = "📌 $pinnedMessage"
+                text = "📌 $pinned"
             )
             manager.sendMessage(message)
         }
     }
+
 
 }
