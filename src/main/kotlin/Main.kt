@@ -1,6 +1,5 @@
 import com.wire.sdk.WireAppSdk
 import com.wire.sdk.WireEventsHandlerSuspending
-import com.wire.sdk.model.ConversationData
 import com.wire.sdk.model.ConversationMember
 import com.wire.sdk.model.QualifiedId
 import com.wire.sdk.model.WireMessage
