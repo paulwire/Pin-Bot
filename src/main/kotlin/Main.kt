@@ -102,12 +102,9 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
 
     override suspend fun onConversationJoin(conversation: ConversationData, members: List<ConversationMember>) {
         super.onConversationJoin(conversation, members)
-        //how do i find the bot's own @-handle in this scenario?
-        val joinMessage = WireMessage.Text.create(
-            conversationId = conversation.id,
-            text = "Hi! If you want to know how I can help, just mention me and type >help<",
-        )
-        manager.sendMessage(joinMessage)
+        val botMention = getBotName()
+        sendHelpOnJoin(conversation.id,botMention)
+        return
     }
 
     override suspend fun onMemberJoin(conversationId: QualifiedId, members: List<ConversationMember>) {
@@ -121,6 +118,15 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
             )
             manager.sendMessage(message)
         }
+    }
+    private suspend fun getBotName(): String {
+        val userIdString = System.getenv("WIRE_SDK_USER_ID") ?: throw IllegalStateException("WIRE_SDK_USER_ID not set")
+        val environment = System.getenv("WIRE_SDK_ENVIRONMENT") ?: throw IllegalStateException("WIRE_SDK_ENVIRONMENT not set")
+        val userId = UUID.fromString(userIdString)
+        val qualifiedId = QualifiedId(userId, environment)
+        val botName = manager.getUserSuspending(qualifiedId).name
+        val botMention = "@$botName"
+        return botMention
     }
     private fun sendHelp(
         conversationId: QualifiedId,
@@ -148,6 +154,36 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
             mentions = wireMessage.mentions
         )
 
+        manager.sendMessage(helpMessage)
+    }
+
+    private fun sendHelpOnJoin(
+        conversationId: QualifiedId,
+        botMention: String
+    ) {
+        val helpText: String
+        if(botMention==""){
+            helpText= "Hey, you have to mention me first if you want my help"
+
+        }else {
+            helpText = """
+        🤖 How to use $botMention
+
+        Usage:
+        $botMention pin "your message"
+        
+        Example:
+        $botMention pin "Welcome to the group!"
+        
+        Help:
+        $botMention help
+        """.trimIndent()
+        }
+        val helpMessage = WireMessage.Text.create(
+            conversationId = conversationId,
+            text = helpText
+        )
+        println("Here!!")
         manager.sendMessage(helpMessage)
     }
 }
