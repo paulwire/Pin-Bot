@@ -46,8 +46,10 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
                 text
             } // no space → whole text is mention
             else text.substring(0, firstSpaceIndex)
-        sendHelp(conversationId,wireMessage,mentionText)
-        if (firstSpaceIndex == -1) return
+        if (firstSpaceIndex == -1){
+            sendHelp(conversationId,wireMessage,mentionText)
+            return
+        }
         // 1) Check for explicit help: "@Bot help"
         if (text.contains("help", ignoreCase = true)) {
             sendHelp(conversationId, wireMessage,mentionText)
