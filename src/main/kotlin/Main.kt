@@ -78,7 +78,28 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
             sendHelp(conversationId, wireMessage,mentionText)
             return
         }
-
+        //find out if sender is admin
+        var isAdmin = false
+        val userIdString = System.getenv("WIRE_SDK_USER_ID") ?: throw IllegalStateException("WIRE_SDK_USER_ID not set")
+        val environment = System.getenv("WIRE_SDK_ENVIRONMENT") ?: throw IllegalStateException("WIRE_SDK_ENVIRONMENT not set")
+        val userId = UUID.fromString(userIdString)
+        val qualifiedId = QualifiedId(userId, environment)
+        for (i in 0..manager.getStoredConversationMembers(wireMessage.conversationId).size-1){
+            println(i)
+            if(manager.getStoredConversationMembers(wireMessage.conversationId)[i].userId == qualifiedId){
+                if (manager.getStoredConversationMembers(wireMessage.conversationId)[i].role.toString() == "ADMIN"){
+                    isAdmin = true
+                }
+            }
+        }
+        if (!isAdmin) {
+            val adminHelpMessage = WireMessage.Text.create(
+                conversationId = conversationId,
+                text = "Sorry, only group admins can pin messages"
+            )
+            manager.sendMessage(adminHelpMessage)
+            return
+        }
         // CASE D — valid pin
         if (match != null) {
             val pinnedText = match.groupValues[1].trim()
@@ -145,7 +166,15 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
         $botMention pin "your message"
         
         Example:
-        $botMention pin "Welcome to the group!"""".trimIndent()
+        $botMention pin "Welcome to the group!"
+                
+        Help:
+        $botMention help
+        
+        Note:
+        Only admins can set a pinned message.
+        
+        """.trimIndent()
         }
         val helpMessage = WireMessage.Text.createReply(
             conversationId = conversationId,
