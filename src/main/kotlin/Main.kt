@@ -102,12 +102,7 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
 
     override suspend fun onConversationJoin(conversation: ConversationData, members: List<ConversationMember>) {
         super.onConversationJoin(conversation, members)
-        val userIdString = System.getenv("WIRE_SDK_USER_ID") ?: throw IllegalStateException("WIRE_SDK_USER_ID not set")
-        val environment = System.getenv("WIRE_SDK_ENVIRONMENT") ?: throw IllegalStateException("WIRE_SDK_ENVIRONMENT not set")
-        val userId = UUID.fromString(userIdString)
-        val qualifiedId = QualifiedId(userId, environment)
-        val botName = manager.getUserSuspending(qualifiedId).name
-        val botMention = "@$botName"
+        val botMention = getBotName()
         sendHelpOnJoin(conversation.id,botMention)
         return
     }
@@ -123,6 +118,15 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
             )
             manager.sendMessage(message)
         }
+    }
+    private suspend fun getBotName(): String {
+        val userIdString = System.getenv("WIRE_SDK_USER_ID") ?: throw IllegalStateException("WIRE_SDK_USER_ID not set")
+        val environment = System.getenv("WIRE_SDK_ENVIRONMENT") ?: throw IllegalStateException("WIRE_SDK_ENVIRONMENT not set")
+        val userId = UUID.fromString(userIdString)
+        val qualifiedId = QualifiedId(userId, environment)
+        val botName = manager.getUserSuspending(qualifiedId).name
+        val botMention = "@$botName"
+        return botMention
     }
     private fun sendHelp(
         conversationId: QualifiedId,
