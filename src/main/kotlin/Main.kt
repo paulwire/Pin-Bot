@@ -1,5 +1,6 @@
 import com.wire.sdk.WireAppSdk
 import com.wire.sdk.WireEventsHandlerSuspending
+import com.wire.sdk.model.ConversationData
 import com.wire.sdk.model.ConversationMember
 import com.wire.sdk.model.QualifiedId
 import com.wire.sdk.model.WireMessage
@@ -99,7 +100,15 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
         sendHelp(conversationId, wireMessage,mentionText)
     }
 
-
+    override suspend fun onConversationJoin(conversation: ConversationData, members: List<ConversationMember>) {
+        super.onConversationJoin(conversation, members)
+        //how do i find the bot's own @-handle in this scenario?
+        val joinMessage = WireMessage.Text.create(
+            conversationId = conversation.id,
+            text = "Hi! If you want to know how I can help, just mention me and type >help<",
+        )
+        manager.sendMessage(joinMessage)
+    }
 
     override suspend fun onMemberJoin(conversationId: QualifiedId, members: List<ConversationMember>) {
         super.onMemberJoin(conversationId, members)
