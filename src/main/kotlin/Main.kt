@@ -162,13 +162,13 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
             helpText = """
         🤖 How to use $botMention
 
-        Usage:
+        **⚒️ Usage:**
         $botMention pin "your message"
         
-        Example:
+        **🧩  Example:**
         $botMention pin "Welcome to the group!"
-                
-        Help:
+        
+        **🛟 Help:**
         $botMention help
         
         Note:
