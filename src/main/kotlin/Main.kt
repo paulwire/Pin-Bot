@@ -73,6 +73,25 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
         // ------------------------------------------------------------
         // BLOCK 2 — COMMAND LOGIC
         // ------------------------------------------------------------
+        // CHECK command: "@Bot check"
+        if (text.contains("check", ignoreCase = true)) {
+            val pinned = pinnedMessagesByConversation[conversationId.id]
+
+            val response = if (pinned.isNullOrEmpty()) {
+                "There is no pinned message yet."
+            } else {
+                "📌 Currently pinned message:\n\"$pinned\""
+            }
+
+            val reply = WireMessage.Text.createReply(
+                conversationId = conversationId,
+                text = response,
+                originalMessage = wireMessage,
+                mentions = wireMessage.mentions
+            )
+            manager.sendMessage(reply)
+            return
+        }
 
         // 1) Help request
         if (text.contains("help", ignoreCase = true)) {
@@ -195,6 +214,9 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
                 🧩 Example:
                 $botMention pin "Welcome to the group!"
 
+                👀 Read back current pin: 
+                $botMention check
+                
                 🛟 Help:
                 $botMention help
 
