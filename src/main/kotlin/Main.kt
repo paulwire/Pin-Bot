@@ -190,12 +190,7 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
     override suspend fun onMemberLeave(conversationId: QualifiedId, members: List<QualifiedId>) {
         super.onMemberLeave(conversationId, members)
         //implement deletion of a pin for the specific conversation from which the bot receives this event, if there is a pinned message stored
-        println(manager.getStoredConversations()[0].id)
-        if(pinnedMessagesByConversation.keys.contains(conversationId.id)){
-            pinnedMessagesByConversation.remove(conversationId.id)
-        }
-        println(manager.getStoredConversations()[0].id)
-//        manager.getStoredConversations()
+        //this needs to be re-worked on the adequate branch
     }
     private fun isUserAdmin(wireMessage: WireMessage.Text): Boolean {
         val userIdString = System.getenv("WIRE_SDK_USER_ID")
