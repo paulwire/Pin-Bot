@@ -63,6 +63,40 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
         // C) Extract "@BotName"
         val firstSpace = text.indexOf(" ")
         val mentionText = if (firstSpace == -1) text else text.substring(0, firstSpace)
+// --- UPDATE COMMAND HANDLING ---
+        val updateRegex = Regex("""update\s+"([^"]*)"""", RegexOption.IGNORE_CASE)
+        val updateMatch = updateRegex.find(text)
+
+        if (updateMatch != null) {
+            // Only admins can update
+            if (!isUserAdmin(wireMessage)) {
+                sendAdminOnly(conversationId)
+                return
+            }
+
+            val newPinnedText = updateMatch.groupValues[1].trim()
+            if (newPinnedText.isBlank()) {
+                val msgEmptyUpdate = WireMessage.Text.createReply(
+                    conversationId = conversationId,
+                    text = "Update failed: the message cannot be empty.",
+                    originalMessage = wireMessage,
+                    mentions = wireMessage.mentions
+                )
+                manager.sendMessage(msgEmptyUpdate)
+                return
+            }
+
+            pinnedMessagesByConversation[conversationId.id] = newPinnedText
+
+            val updateConfirmation = WireMessage.Text.createReply(
+                conversationId = conversationId,
+                text = "🔄 Updated pinned message: \"$newPinnedText\"",
+                originalMessage = wireMessage,
+                mentions = wireMessage.mentions
+            )
+            manager.sendMessage(updateConfirmation)
+            return
+        }
 
         // If only "@BotName" was sent
         if (firstSpace == -1) {
