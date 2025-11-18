@@ -123,6 +123,20 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
             sendAdminOnly(conversationId)
             return
         }
+        // If a pinned message already exists, don't allow overwriting
+        val existingPinned = pinnedMessagesByConversation[conversationId.id]
+        if (!existingPinned.isNullOrEmpty()) {
+            val warning = WireMessage.Text.createReply(
+                conversationId = conversationId,
+                text = "❗ A pinned message already exists.\n" +
+                        "Use ${mentionText} update \"new message\" instead.\n\n" +
+                        "Currently pinned message:\n\"$existingPinned\"",
+                originalMessage = wireMessage,
+                mentions = wireMessage.mentions
+            )
+            manager.sendMessage(warning)
+            return
+        }
 
         // 4) Valid PIN
         if (match != null) {
