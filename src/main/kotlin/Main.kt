@@ -209,6 +209,7 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
 
 
     private fun isUserAdmin(wireMessage: WireMessage.Text): Boolean {
+        //somehow this check does not work, if the bot is added during group creation
         val userIdString = System.getenv("WIRE_SDK_USER_ID")
             ?: throw IllegalStateException("WIRE_SDK_USER_ID not set")
         val environment = System.getenv("WIRE_SDK_ENVIRONMENT")
