@@ -1,127 +1,118 @@
-# 📌 Wire Pin Bot
+# Pin-Bot
 
-A simple Kotlin-based Wire bot that allows users to **pin messages** inside group conversations by mentioning the bot and using a clean command syntax.
-
-The bot responds to mentions, provides help instructions, and automatically sends the pinned message to any new member who joins the conversation.
-
----
-
-## 🚀 Features
-
-### ✔ Pin Messages
-You can pin any message to the current Wire conversation by mentioning the bot:
-
-```
-@YourBotName pin "This is the pinned message"
-```
-
-The bot will respond with:
-
-```
-📌 I pinned this message: This is the pinned message
-```
-
-The pinned message is stored **per conversation**, not shared between groups.
+Pin-Bot is a lightweight Wire bot that allows group admins to define a *pinned message* that will automatically be displayed to new members when they join a conversation.  
+It also provides simple commands for checking, updating, and managing the pinned message — all triggered by mentioning the bot.
 
 ---
 
-### ✔ Automatic Message for New Members
-Whenever a new user joins a conversation, the bot will automatically send the pinned message:
+## ✨ Features
+
+### 📌 Pin Messages (Admin-Only)
+Admins can set a pinned message using:
 
 ```
-📌 This is the pinned message
+@BotName pin "your message here"
 ```
 
-Super useful for welcome messages, rules, or other reminders.
+Rules:
+
+- Only **admins** can set a pinned message.
+- A pinned message can be set **only once**.
+- If a pinned message already exists, the bot will refuse to overwrite it and instruct the admin to use the `update` command instead.
 
 ---
 
-### ✔ Help Menu
-If you mention the bot incorrectly, or explicitly ask for help:
+### 🔄 Update Pinned Message (Admin-Only)
+Admins can update an existing pinned message:
 
 ```
-@YourBotName help
+@BotName update "your new message"
 ```
 
-The bot replies with instructions on how to use it.
-
-The bot also detects incorrect command formats:
-
-- Missing `"pin"`
-- Missing quotes
-- Empty quotes
-- Mentioning the bot in the wrong place
-
-In all cases, the bot sends the help menu.
+- Only admins may update.
+- The updated message fully replaces the previous pinned message.
 
 ---
 
-## 🧩 How It Works
-
-The bot listens for incoming messages using the official **Wire JVM SDK**.  
-It checks whether the bot is mentioned, validates the command syntax, and stores pinned messages per conversation using:
-
-```kotlin
-private val pinnedMessagesByConversation = mutableMapOf<UUID, String>()
-```
-
-It also handles:
-
-- `onMessage` → detecting pin commands
-- `onConversationJoin` → greeting message
-- `onMemberJoin` → replaying pinned messages
-
-## 📦 Installation & Setup
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/your-username/Pin-Bot.git
-   ```
-
-2. Open the project in an IDE of your choice (e.g. IntelliJ IDEA).
-
-3. Insert your Wire application credentials in `main.kt`:
-
-   ```kotlin
-   apiToken = "your-api-token-here"
-   apiHost = "your-wire-host"
-   ```
-
-4. Run the bot:
-
-   ```
-   ./gradlew run
-   ```
-
-## 🛠 Requirements
-
-- Kotlin 1.9+
-- JVM 17+
-- Wire Apps JVM SDK
-- A Wire Developer Account and API Token
-
-## 📁 Project Structure
+### 👀 Check Current Pin (Everyone)
+Anyone in the conversation (admin or not) can check the currently pinned message:
 
 ```
-Pin-Bot/
-│
-├── src/
-│   ├── main/
-│   │   └── kotlin/
-│   │       └── Main.kt
-│   │
-│   └── test/
-│
-└── README.md
+@BotName check
 ```
 
-## 🤝 Contributing
+If no pinned message is set yet, the bot will inform the user.
 
-Pull requests are welcome!  
-If you find issues or have ideas to improve the bot, feel free to open an issue.
+---
 
+### 🧵 Auto-Message on Member Join
+Whenever a new participant joins the conversation, the bot automatically sends the active pinned message (if one exists).
 
+This ensures every new member immediately sees important information such as:
 
-## 💬 Contact
+- community rules
+- onboarding instructions
+- announcements
+- links or guidelines
 
-If you need help getting your bot running, feel free to open an issue in this repo.
+---
+
+### 🛟 Help Command (Everyone)
+Anyone can ask the bot for help:
+
+```
+@BotName help
+```
+
+The bot responds with a usage overview including examples.
+
+If the bot is mentioned alone with no command (e.g., `@BotName`), the bot also displays the help message.
+
+---
+
+## 🧠 Command Syntax
+
+Commands must start by **mentioning the bot**, followed by a keyword such as:
+
+- `pin`
+- `update`
+- `check`
+- `help`
+
+Examples:
+
+```
+@PinBot pin "Welcome to the group!"
+@PinBot update "Please check the new rules in #announcements."
+@PinBot check
+@PinBot help
+```
+
+---
+
+## 🔐 Admin Permissions
+
+The bot validates admin status using the sender’s `QualifiedId` and the stored conversation members.
+
+Only admins may:
+
+- set pinned messages (`pin`)
+- update pinned messages (`update`)
+
+Non-admin users receive:
+
+```
+Sorry, only group admins can pin messages
+```
+
+---
+
+## 🚀 Feature Summary
+
+| Feature            | Description                    | Who Can Use It |
+|--------------------|--------------------------------|----------------|
+| `pin "message"`    | Set the pinned message         | Admins         |
+| `update "message"` | Update existing pinned message | Admins         |
+| `check`            | Show current pinned message    | Everyone       |
+| `help`             | Display usage instructions     | Everyone       |
+| auto-send on join  | Bot posts pinned message whe   |
