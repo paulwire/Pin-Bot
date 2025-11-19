@@ -119,5 +119,5 @@ Sorry, only group admins can pin messages
 | `update "message"`   | Update existing pinned message                              | Admins         |
 | `check`              | Show current pinned message                                 | Everyone       |
 | `help`               | Display usage instructions                                  | Everyone       |
-| auto-send on join    | Bot posts pinned message whe                                |
+| auto-send on join    | Bot posts pinned message when user joins conversation       |
 | auto-delete on leave | Bot deletes a pinned message when removed from conversation |
