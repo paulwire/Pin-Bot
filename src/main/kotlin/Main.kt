@@ -260,19 +260,19 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
             } else """
                 🤖 How to use $botMention
 
-                ⚒️ Usage:
+                ⚒️ **Usage**:
                 $botMention pin "your message"
 
-                🧩 Example:
+                🧩 **Example**:
                 $botMention pin "Welcome to the group!"
 
-                👀 Read back current pin: 
+                👀 **Read back current pin**: 
                 $botMention check
                 
-                🛟 Help:
+                🛟 **Help**:
                 $botMention help
 
-                Note: Only admins can set a pinned message.
+                ℹ️ **Note**: Only admins can set a pinned message.
             """.trimIndent()
 
         val msg = WireMessage.Text.createReply(
@@ -291,14 +291,22 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
             } else """
                 🤖 How to use $botMention
 
-                ⚒️ Usage:
+                ⚒️ **Add a new pinned message**:
                 $botMention pin "your message"
 
-                🧩 Example:
+                🔄 **Update a pinned message**
+                $botMention update "your message"
+                
+                🧩 **Example**:
                 $botMention pin "Welcome to the group!"
 
-                🛟 Help:
+                👀 **Read back current pin**: 
+                $botMention check
+                
+                🛟 **Help**:
                 $botMention help
+
+                ℹ️ **Note**: Only admins can set a pinned message.
             """.trimIndent()
 
         val msg = WireMessage.Text.create(
