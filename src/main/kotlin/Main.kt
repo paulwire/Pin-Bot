@@ -189,9 +189,25 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
     // ------------------------------------------------------------
     override suspend fun onMemberLeave(conversationId: QualifiedId, members: List<QualifiedId>) {
         super.onMemberLeave(conversationId, members)
-        //implement deletion of a pin for the specific conversation from which the bot receives this event, if there is a pinned message stored
-        //this needs to be re-worked on the adequate branch
+
+        val botUserIdString = System.getenv("WIRE_SDK_USER_ID")
+            ?: throw IllegalStateException("WIRE_SDK_USER_ID not set")
+
+        val environment = System.getenv("WIRE_SDK_ENVIRONMENT")
+            ?: throw IllegalStateException("WIRE_SDK_ENVIRONMENT not set")
+
+        val botQualifiedId = QualifiedId(UUID.fromString(botUserIdString), environment)
+
+        // Was the bot removed?
+        val botRemoved = members.any { it == botQualifiedId }
+
+        if (botRemoved) {
+            pinnedMessagesByConversation.remove(conversationId.id)
+            println("Pin removed because bot left conversation $conversationId")
+        }
     }
+
+
     private fun isUserAdmin(wireMessage: WireMessage.Text): Boolean {
         val userIdString = System.getenv("WIRE_SDK_USER_ID")
             ?: throw IllegalStateException("WIRE_SDK_USER_ID not set")
