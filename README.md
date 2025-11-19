@@ -56,6 +56,10 @@ This ensures every new member immediately sees important information such as:
 - links or guidelines
 
 ---
+### ❌ Message gets deleted on Member leave (Bot removed from conversation)
+Whenever the bot gets removed from a conversation, it auto-deletes any previously pinned message.
+
+---
 
 ### 🛟 Help Command (Everyone)
 Anyone can ask the bot for help:
@@ -109,10 +113,11 @@ Sorry, only group admins can pin messages
 
 ## 🚀 Feature Summary
 
-| Feature            | Description                    | Who Can Use It |
-|--------------------|--------------------------------|----------------|
-| `pin "message"`    | Set the pinned message         | Admins         |
-| `update "message"` | Update existing pinned message | Admins         |
-| `check`            | Show current pinned message    | Everyone       |
-| `help`             | Display usage instructions     | Everyone       |
-| auto-send on join  | Bot posts pinned message whe   |
+| Feature              | Description                                                 | Who Can Use It |
+|----------------------|-------------------------------------------------------------|----------------|
+| `pin "message"`      | Set the pinned message                                      | Admins         |
+| `update "message"`   | Update existing pinned message                              | Admins         |
+| `check`              | Show current pinned message                                 | Everyone       |
+| `help`               | Display usage instructions                                  | Everyone       |
+| auto-send on join    | Bot posts pinned message whe                                |
+| auto-delete on leave | Bot deletes a pinned message when removed from conversation |
