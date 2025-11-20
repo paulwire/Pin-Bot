@@ -283,7 +283,7 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
                 🧩 **Example**:
                 $botMention pin "Welcome to the group!"
                 
-                👀 **Update an existing pinned message**: 
+                ✍️ **Update an existing pinned message**: 
                 $botMention update "your new pinned message"
                 
                 👀 **Read back current pin**: 
