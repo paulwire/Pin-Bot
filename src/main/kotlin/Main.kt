@@ -25,7 +25,7 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
     // MESSAGE HANDLER
     // ------------------------------------------------------------
 
-    override suspend fun onMessage(wireMessage: WireMessage.Text) {
+    override suspend fun onTextMessageReceived(wireMessage: WireMessage.Text) {
         val conversationId = wireMessage.conversationId
         val botId = manager.getApplicationDataSuspending().appClientId
 
@@ -187,8 +187,8 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
     // ------------------------------------------------------------
     // ADMIN CHECK
     // ------------------------------------------------------------
-    override suspend fun onMemberLeave(conversationId: QualifiedId, members: List<QualifiedId>) {
-        super.onMemberLeave(conversationId, members)
+    override suspend fun onUserLeftConversation(conversationId: QualifiedId, members: List<QualifiedId>) {
+        super.onUserLeftConversation(conversationId, members)
 
         val botUserIdString = System.getenv("WIRE_SDK_USER_ID")
             ?: throw IllegalStateException("WIRE_SDK_USER_ID not set")
@@ -209,14 +209,9 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
 
 
     private fun isUserAdmin(wireMessage: WireMessage.Text): Boolean {
-        //somehow this check does not work, if the bot is added during group creation
-        val userIdString = System.getenv("WIRE_SDK_USER_ID")
-            ?: throw IllegalStateException("WIRE_SDK_USER_ID not set")
         val environment = System.getenv("WIRE_SDK_ENVIRONMENT")
             ?: throw IllegalStateException("WIRE_SDK_ENVIRONMENT not set")
-
-        val userId = UUID.fromString(userIdString)
-        val qualifiedId = QualifiedId(userId, environment)
+        val qualifiedId = QualifiedId(wireMessage.sender.id,environment)
 
         val members = manager.getStoredConversationMembers(wireMessage.conversationId)
         return members.any { it.userId == qualifiedId && it.role.toString() == "ADMIN" }
@@ -226,14 +221,14 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
     // EVENTS
     // ------------------------------------------------------------
 
-    override suspend fun onConversationJoin(conversation: ConversationData, members: List<ConversationMember>) {
-        super.onConversationJoin(conversation, members)
+    override suspend fun onAppAddedToConversation(conversation: ConversationData, members: List<ConversationMember>) {
+        super.onAppAddedToConversation(conversation, members)
         val botMention = getBotMention()
         sendHelpOnJoin(conversation.id, botMention)
     }
 
-    override suspend fun onMemberJoin(conversationId: QualifiedId, members: List<ConversationMember>) {
-        super.onMemberJoin(conversationId, members)
+    override suspend fun onUserJoinedConversation(conversationId: QualifiedId, members: List<ConversationMember>) {
+        super.onUserJoinedConversation(conversationId, members)
 
         val pinned = pinnedMessagesByConversation[conversationId.id]
         if (!pinned.isNullOrEmpty()) {
