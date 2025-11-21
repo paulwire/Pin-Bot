@@ -5,6 +5,8 @@ import com.wire.sdk.model.ConversationMember
 import com.wire.sdk.model.QualifiedId
 import com.wire.sdk.model.WireMessage
 import java.util.UUID
+import db.PinDatabase
+
 
 fun main() {
     val wireAppSdk = WireAppSdk(
@@ -19,7 +21,7 @@ fun main() {
 
 class SampleEventsHandler : WireEventsHandlerSuspending() {
 
-    private val pinnedMessagesByConversation = mutableMapOf<UUID, String>()
+    // legacy in memory storage: private val pinnedMessagesByConversation = mutableMapOf<UUID, String>()
 
     // ------------------------------------------------------------
     // MESSAGE HANDLER
@@ -86,8 +88,11 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
                 return
             }
 
-            pinnedMessagesByConversation[conversationId.id] = newPinnedText
-
+            // legacy in memory storage: pinnedMessagesByConversation[conversationId.id] = newPinnedText
+            PinDatabase.setEncryptedPin(
+                conversationId.id.toString(),
+                newPinnedText.toByteArray(Charsets.UTF_8)
+            )
             val updateConfirmation = WireMessage.Text.createReply(
                 conversationId = conversationId,
                 text = "🔄 Updated pinned message: \"$newPinnedText\"",
@@ -109,7 +114,9 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
         // ------------------------------------------------------------
         // CHECK command: "@Bot check"
         if (text.contains("check", ignoreCase = true)) {
-            val pinned = pinnedMessagesByConversation[conversationId.id]
+            // legacy in memory storage val pinned = pinnedMessagesByConversation[conversationId.id]
+            val pinnedBytes = PinDatabase.getEncryptedPin(conversationId.id.toString())
+            val pinned = pinnedBytes?.toString(Charsets.UTF_8)
 
             val response = if (pinned.isNullOrEmpty()) {
                 "There is no pinned message yet."
@@ -158,7 +165,9 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
             return
         }
         // If a pinned message already exists, don't allow overwriting
-        val existingPinned = pinnedMessagesByConversation[conversationId.id]
+        // legacy in memory storage: val existingPinned = pinnedMessagesByConversation[conversationId.id]
+        val existingPinnedBytes = PinDatabase.getEncryptedPin(conversationId.id.toString())
+        val existingPinned = existingPinnedBytes?.toString(Charsets.UTF_8)
         if (!existingPinned.isNullOrEmpty()) {
             val warning = WireMessage.Text.createReply(
                 conversationId = conversationId,
@@ -175,7 +184,8 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
         // 4) Valid PIN
         if (match != null) {
             val pinnedText = match.groupValues[1].trim()
-            pinnedMessagesByConversation[conversationId.id] = pinnedText
+            //legacy in memory storage: pinnedMessagesByConversation[conversationId.id] = pinnedText
+            PinDatabase.setEncryptedPin(conversationId.id.toString(), pinnedText.toByteArray())
             sendPinConfirmation(conversationId, wireMessage, pinnedText)
             return
         }
@@ -202,7 +212,8 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
         val botRemoved = members.any { it == botQualifiedId }
 
         if (botRemoved) {
-            pinnedMessagesByConversation.remove(conversationId.id)
+            //legacy in memory storage: pinnedMessagesByConversation.remove(conversationId.id)
+            PinDatabase.deletePin(conversationId.id.toString())
             println("Pin removed because bot left conversation $conversationId")
         }
     }
@@ -230,7 +241,9 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
     override suspend fun onUserJoinedConversation(conversationId: QualifiedId, members: List<ConversationMember>) {
         super.onUserJoinedConversation(conversationId, members)
 
-        val pinned = pinnedMessagesByConversation[conversationId.id]
+        // legacy in memory storage: val pinned = pinnedMessagesByConversation[conversationId.id]
+        val pinnedBytes = PinDatabase.getEncryptedPin(conversationId.id.toString())
+        val pinned = pinnedBytes?.toString(Charsets.UTF_8)
         if (!pinned.isNullOrEmpty()) {
             val msg = WireMessage.Text.create(
                 conversationId = conversationId,
