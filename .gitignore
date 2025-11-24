@@ -43,3 +43,16 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+# Secrets
+pinbot.key
+.env
+*.env
+
+# Database
+pins.db
+
+# Build artifacts
+
+# IDE noise
+.idea/

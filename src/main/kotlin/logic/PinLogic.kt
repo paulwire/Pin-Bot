@@ -4,6 +4,7 @@ import com.wire.sdk.model.WireMessage
 import db.PinDatabase
 import handler.SampleEventsHandler
 import util.BotHelpers
+import crypto.Crypto
 
 class PinLogic {
 
@@ -71,10 +72,15 @@ class PinLogic {
                 return
             }
 
+//            PinDatabase.setEncryptedPin(
+//                conversationId.id.toString(),
+//                newPinnedText.toByteArray()
+//            )
             PinDatabase.setEncryptedPin(
                 conversationId.id.toString(),
-                newPinnedText.toByteArray()
+                Crypto.encrypt(newPinnedText.toByteArray())
             )
+
 
             val confirm = WireMessage.Text.createReply(
                 conversationId = conversationId,
@@ -96,8 +102,10 @@ class PinLogic {
         // ------------------------------------------------------------
 
         if (text.contains("check", ignoreCase = true)) {
-            val pinnedBytes = PinDatabase.getEncryptedPin(conversationId.id.toString())
-            val pinned = pinnedBytes?.toString(Charsets.UTF_8)
+//            val pinnedBytes = PinDatabase.getEncryptedPin(conversationId.id.toString())
+//            val pinned = pinnedBytes?.toString(Charsets.UTF_8)
+            val encrypted = PinDatabase.getEncryptedPin(conversationId.id.toString())
+            val pinned = encrypted?.let { Crypto.decrypt(it).toString(Charsets.UTF_8) }
 
             val response = if (pinned.isNullOrEmpty()) {
                 "There is no pinned message yet."
@@ -140,8 +148,10 @@ class PinLogic {
             return
         }
 
-        val existingPinnedBytes = PinDatabase.getEncryptedPin(conversationId.id.toString())
-        val existingPinned = existingPinnedBytes?.toString(Charsets.UTF_8)
+//        val existingPinnedBytes = PinDatabase.getEncryptedPin(conversationId.id.toString())
+//        val existingPinned = existingPinnedBytes?.toString(Charsets.UTF_8)
+        val existingEncrypted = PinDatabase.getEncryptedPin(conversationId.id.toString())
+        val existingPinned = existingEncrypted?.let { Crypto.decrypt(it).toString(Charsets.UTF_8) }
 
         if (!existingPinned.isNullOrEmpty()) {
             val warn = WireMessage.Text.createReply(
@@ -159,9 +169,13 @@ class PinLogic {
         if (match != null) {
             val pinnedText = match.groupValues[1].trim()
 
+//            PinDatabase.setEncryptedPin(
+//                conversationId.id.toString(),
+//                pinnedText.toByteArray()
+//            )
             PinDatabase.setEncryptedPin(
                 conversationId.id.toString(),
-                pinnedText.toByteArray()
+                Crypto.encrypt(pinnedText.toByteArray())
             )
 
             helpers.sendPinConfirmation(conversationId, wireMessage, pinnedText, handler)

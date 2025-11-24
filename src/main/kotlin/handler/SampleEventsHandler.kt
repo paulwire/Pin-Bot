@@ -10,6 +10,7 @@ import logic.PinLogic
 import logic.AdminCheck
 import util.BotHelpers
 import java.util.UUID
+import crypto.Crypto
 
 class SampleEventsHandler : WireEventsHandlerSuspending() {
 
@@ -36,8 +37,10 @@ class SampleEventsHandler : WireEventsHandlerSuspending() {
     ) {
         super.onUserJoinedConversation(conversationId, members)
 
+//        val pinnedBytes = PinDatabase.getEncryptedPin(conversationId.id.toString())
+//        val pinned = pinnedBytes?.toString(Charsets.UTF_8)
         val pinnedBytes = PinDatabase.getEncryptedPin(conversationId.id.toString())
-        val pinned = pinnedBytes?.toString(Charsets.UTF_8)
+        val pinned = pinnedBytes?.let { Crypto.decrypt(it).toString(Charsets.UTF_8) }
 
         if (!pinned.isNullOrEmpty()) {
             val msg = WireMessage.Text.create(
