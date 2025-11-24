@@ -24,8 +24,9 @@ object KeyStore {
     val masterKey: SecretKey by lazy { loadOrCreateKey() }
 
     private fun loadOrCreateKey(): SecretKey {
-        val password = System.getenv("PINBOT_MASTER_PASSWORD")
-            ?: error("Set PINBOT_MASTER_PASSWORD env var!")
+        val password = System.getProperty("PINBOT_MASTER_PASSWORD")
+            ?: System.getenv("PINBOT_MASTER_PASSWORD")
+            ?: error("Set PINBOT_MASTER_PASSWORD env var or system property!")
 
         if (!keyFile.exists()) {
             val keyBytes = ByteArray(32)
